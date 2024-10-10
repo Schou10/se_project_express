@@ -1,7 +1,6 @@
-const http = require('http');
 const express = require("express");
 const mongoose = require("mongoose");
-const mainRouter = require("./routes/index")
+const mainRouter = require("./routes/index");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -13,12 +12,7 @@ mongoose
   })
   .catch(console.error);
 
-const routes = require("./routes")
-app.use(routes)
-
 app.use(express.json());
-
-app.use("/", mainRouter)
 
 app.use((req, res, next) => {
   req.user = {
@@ -26,6 +20,8 @@ app.use((req, res, next) => {
   };
   next();
 });
+
+app.use("/", mainRouter);
 
 
 app.listen(PORT, () => {

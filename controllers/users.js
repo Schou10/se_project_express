@@ -1,11 +1,12 @@
 const { get } = require("mongoose");
-const user = require("../models/users");
+const User = require("../models/users");
 const {err400, err404, err500} =require("../utils/errors")
 
 // GET /users returns list of users
 const getUsers = (req, res) =>{
+  console.log(req.method, req.path);
   console.log("Getting Users");
-  user.find({})
+  User.find({})
     .then((users)=> res.send(users))
     .catch((err)=>{
       console.error(err);
@@ -14,10 +15,11 @@ const getUsers = (req, res) =>{
 }
 //POST /users creates a new user
 const createUser = (req, res) => {
+  console.log(req.method, req.path);
   console.log("Creating new User");
   const {name, avatar} = req.body;
   console.log(name, avatar)
-  user.create({name, avatar})
+  User.create({name, avatar})
     .then((user)=>{
       res.status(201).send(user);
     })
@@ -33,8 +35,10 @@ const createUser = (req, res) => {
 
 //GET /user/:userId returns one user that matches the id
 const getUser = (req, res) => {
+  console.log(req.method, req.path);
+  console.log("Getting user by Id");
   const { userId } = req.params;
-  user.findById(userId)
+  User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err)=>{
