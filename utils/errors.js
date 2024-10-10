@@ -1,16 +1,5 @@
-const err400 ={
-  message: "Invalid ID",
-  status: 400
-}
-const err404 ={
-  message: "No user/item found",
-  status: 404
-}
-
-const err500 = {
-  message: "An error has occurred on the server.",
-  status: 500,
+module.exports = {
+  err400: { status: 400, message: 'Bad Request' },
+  err404: { status: 404, message: 'Not Found' },
+  err500: { status: 500, message: 'Internal Server Error' }
 };
-
-
-module.exports = {err400, err404, err500}

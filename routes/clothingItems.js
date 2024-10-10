@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const { getItems, createItem, deleteItem } = require("../controllers/clothingItems")
+const { getItems, createItem, deleteItem, likeItem, dislikeItem  } = require("../controllers/clothingItems");
 
 // Route to get all the clothing items
 router.get("/", getItems);
@@ -9,5 +9,12 @@ router.post("/", createItem);
 
 // Route to delete a clothing item by ID
 router.delete("/:itemId", deleteItem);
+
+
+// Route to like a clothing item
+router.put('/:itemId/likes', likeItem);
+
+// Route to dislike a clothing item
+router.delete('/:itemId/likes', dislikeItem);
 
 module.exports = router;

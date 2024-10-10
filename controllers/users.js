@@ -10,7 +10,7 @@ const getUsers = (req, res) =>{
     .then((users)=> res.send(users))
     .catch((err)=>{
       console.error(err);
-      return res.status(error.status).send(error.message);
+      return res.status(err500.status).send(err500.message);
     })
 }
 //POST /users creates a new user
@@ -27,9 +27,9 @@ const createUser = (req, res) => {
       console.error(err);
       console.log(err.name);
       if (err.name === "ValidationError"){
-        return res.status(err404.status).send(err404.message, err);
+        return res.status(err400.status).send(err400.message, err);
       }
-      return res.status(err400.status).send(err400.message, err);
+      return res.status(err500.status).send(err500.message, err);
     });
 }
 
