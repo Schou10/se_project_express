@@ -56,6 +56,18 @@ const deleteItem = (res, req) => {
     })
 }
 
+//PUT update item
+const updateItem = (req, res) => {
+  const {itemId} = req.params;
+  const {imageURL} = req.body;
+  ClothingItem.findByIdAndUpdate(itemId, {$set: {imageUrl}})
+    .orFail()
+    .then((item)=>{res.status(200).send(item)})
+    .catch((err)=>{
+      return res.status(err500.status).send(err500.message, err);
+    })
+}
+
 module.exports =  { getItems, createItem, deleteItem };
 module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,

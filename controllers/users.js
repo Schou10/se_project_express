@@ -38,12 +38,14 @@ const getUser = (req, res) => {
   console.log(req.method, req.path);
   console.log("Getting user by Id");
   const { userId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(err400.status).send({ message: "Invalid user ID" });
+  }
   User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err)=>{
     console.error(err);
-    console.log(err.name);
     if (err.name === "DocumentNotFoundError"){
       return res.status(err404.status).send(err404.message, err);
     }else if (err.name === "CastError"){
@@ -51,8 +53,6 @@ const getUser = (req, res) => {
     }
     return res.status(err500.status).send(err500.message, err);
   });
-
-
 }
 
 module.exports =  { getUsers, createUser, getUser };
