@@ -65,7 +65,7 @@ const updateItem = (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res.status(err400.status).send({ message: "Invalid item ID" });
   }
-  ClothingItem.findByIdAndUpdate(itemId, {$set: {imageUrl}})
+  ClothingItem.findByIdAndUpdate(itemId, {$set: {imageURL}})
     .orFail()
     .then((item)=>{res.status(200).send(item)})
     .catch((err)=>{
