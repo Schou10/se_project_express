@@ -1,4 +1,3 @@
-const { get } = require("mongoose");
 const User = require("../models/users");
 const {err400, err404, err500} =require("../utils/errors")
 const mongoose = require('mongoose');
