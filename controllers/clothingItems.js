@@ -73,7 +73,7 @@ const updateItem = (req, res) => {
     })
 }
 
-module.exports =  { getItems, createItem, deleteItem };
+module.exports =  { getItems, createItem, deleteItem, updateItem };
 module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
