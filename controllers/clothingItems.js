@@ -1,5 +1,7 @@
 const ClothingItem = require("../models/clothingItems");
 const {err400, err404, err500 } = require("../utils/errors")
+const mongoose = require('mongoose');
+
 // GET /items returns all the items
 const getItems = (req, res) =>{
   console.log(req);
@@ -60,6 +62,9 @@ const deleteItem = (res, req) => {
 const updateItem = (req, res) => {
   const {itemId} = req.params;
   const {imageURL} = req.body;
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(err400.status).send({ message: "Invalid item ID" });
+  }
   ClothingItem.findByIdAndUpdate(itemId, {$set: {imageUrl}})
     .orFail()
     .then((item)=>{res.status(200).send(item)})
