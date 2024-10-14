@@ -19,9 +19,9 @@ const createUser = (req, res) => {
     .then((user)=> res.status(201).send(user))
     .catch((err)=>{
       if (err.name === "ValidationError"){
-        return res.status(err400.status).send(err400.message);
+        return res.status(err400.status).send({message: err400.message});
       }
-      return res.status(err500.status).send(err500.message);
+      return res.status(err500.status).send({message: err500.message});
     });
 }
 
