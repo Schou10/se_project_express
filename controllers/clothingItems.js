@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const ClothingItem = require("../models/clothingItems");
 const {err400, err404, err500 } = require("../utils/errors")
 
@@ -7,7 +6,7 @@ const {err400, err404, err500 } = require("../utils/errors")
 const getItems = (req, res) =>{
   ClothingItem.find({})
     .then((items)=> res.status(200).send(items))
-    .catch((err)=> res.status(err500.status).send({message: err500.message}))
+    .catch(()=> res.status(err500.status).send({message: err500.message}))
 }
 
 // POST /items creates a new item
@@ -51,11 +50,11 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   { new: true },
 )
   .then((like)=> res.status(200).send(like))
-  .catch((err)=> res.status(err500.status).send({message: err500.message}));
+  .catch(()=> res.status(err500.status).send({message: err500.message}));
 module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $pull: { likes: req.user._id } }, // remove _id from the array
   { new: true },
 )
   .then((dislike)=> res.status(200).send(dislike))
-  .catch((err)=> res.status(err500.status).send({message: err500.message}));
+  .catch(()=> res.status(err500.status).send({message: err500.message}));
