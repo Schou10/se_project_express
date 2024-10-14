@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { err400 } = require("../utils/errors");
 const  clothingItemRouter = require("./clothingItems");
 const userRouter = require("./users");
 
@@ -10,7 +11,7 @@ router.use("/users", userRouter);
 
 // Route response if route is invalid
 router.use((req, res) => {
-  res.status(404).send({message: "Route not found"});
+  res.status(err400).send({message: "Route not found"});
 });
 
 module.exports = router;
