@@ -9,7 +9,7 @@ const getUsers = (req, res) =>{
     .then((users)=> res.send(users))
     .catch((err)=>{
       console.error(err);
-      return res.status(err500.status).send(err500.message);
+      return res.status(err400.status).send({message: err400.message});
     })
 }
 // POST /users creates a new user

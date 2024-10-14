@@ -11,7 +11,7 @@ router.use("/users", userRouter);
 
 // Route response if route is invalid
 router.use((req, res) => {
-  res.status(err400).send({message: "Route not found"});
+  res.status(err404.status).send({message: "Route not found"});
 });
 
 module.exports = router;

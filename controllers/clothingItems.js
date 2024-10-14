@@ -17,10 +17,10 @@ const createItem = (req, res) => {
     return res.status(err400).send({message: 'All fields are required'});
   }
   // Creates the item in the database
-  ClothingItem.create({name,weather,imageUrl})
-    .then((item)=> res.status(201).res.send(item))
+  ClothingItem.create({name,weather,imageUrl, owner: req.user._id})
+    .then((item)=> res.status(201).send(item))
     .catch((err)=>{
-      if (err.name === "ValidationErro"){
+      if (err.name === "ValidationError"){
         return res.status(err400.status).send({message: err400.message});
       }
       return res.status(err500.status).send({message: err500.message});
@@ -28,7 +28,7 @@ const createItem = (req, res) => {
 }
 
 // DELETE /items/:itemId deletes item with specific id
-const deleteItem = (res, req) => {
+const deleteItem = (req, res) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
     .orFail()
@@ -49,12 +49,30 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
   { new: true },
 )
+  .orFail()
   .then((like)=> res.status(200).send(like))
-  .catch(()=> res.status(err500.status).send({message: err500.message}));
+  .catch(()=>{
+    if (err.name === "DocumentNotFoundError") {
+      res.status(err404.status).send({message: err404.message});
+    }
+    else if (err.name === 'CastError') {
+      res.status(err400.status).send({message: err400.message});
+    }
+    res.status(err500.status).send({message: err500.message})
+  });
 module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $pull: { likes: req.user._id } }, // remove _id from the array
   { new: true },
 )
+  .orFail()
   .then((dislike)=> res.status(200).send(dislike))
-  .catch(()=> res.status(err500.status).send({message: err500.message}));
+  .catch(()=> {
+    if (err.name === "DocumentNotFoundError") {
+      res.status(err404.status).send({message: err404.message});
+    }
+    else if (err.name === 'CastError') {
+      res.status(err400.status).send({message: err400.message});
+    }
+    res.status(err500.status).send({message: err500.message})
+  });
