@@ -14,7 +14,7 @@ const createItem = (req, res) => {
   const {name, weather, imageUrl} =  req.body;
   // Validate incoming data
   if  (!name || !weather || !imageUrl){
-    return res.status(err400).send({message: 'All fields are required'});
+    return res.status(err400.status).send({message: 'All fields are required'});
   }
   // Creates the item in the database
   ClothingItem.create({name,weather,imageUrl, owner: req.user._id})
