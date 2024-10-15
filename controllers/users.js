@@ -31,7 +31,7 @@ const getUser = (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(err400.status).send({ message: "Invalid user ID" });
   }
-  User.findById(userId)
+  return User.findById(userId)
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err)=>{

@@ -17,7 +17,7 @@ const createItem = (req, res) => {
     return res.status(err400.status).send({message: 'All fields are required'});
   }
   // Creates the item in the database
-  ClothingItem.create({name,weather,imageUrl, owner: req.user._id})
+  return ClothingItem.create({name,weather,imageUrl, owner: req.user._id})
     .then((item)=> res.status(201).send(item))
     .catch((err)=>{
       if (err.name === "ValidationError"){
