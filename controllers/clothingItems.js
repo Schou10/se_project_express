@@ -51,14 +51,17 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
 )
   .orFail()
   .then((like)=> res.status(200).send(like))
-  .catch(()=>{
+  .catch((err)=>{
     if (err.name === "DocumentNotFoundError") {
       res.status(err404.status).send({message: err404.message});
     }
     else if (err.name === 'CastError') {
       res.status(err400.status).send({message: err400.message});
     }
-    res.status(err500.status).send({message: err500.message})
+    else{
+      res.status(err500.status).send({message: err500.message})
+    }
+
   });
 module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
@@ -67,12 +70,14 @@ module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
 )
   .orFail()
   .then((dislike)=> res.status(200).send(dislike))
-  .catch(()=> {
+  .catch((err)=> {
     if (err.name === "DocumentNotFoundError") {
       res.status(err404.status).send({message: err404.message});
     }
     else if (err.name === 'CastError') {
       res.status(err400.status).send({message: err400.message});
     }
+    else{
     res.status(err500.status).send({message: err500.message})
+    }
   });
