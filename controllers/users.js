@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const User = require("../models/users");
 const jwt = require('jsonwebtoken');
+const User = require("../models/users");
 const JWT_SECRET = require("../utils/config");
 const {err400, err401, err404, err500} =require("../utils/errors");
 
@@ -85,7 +85,7 @@ const updateUser = (req, res)=>{
     .catch ((err) => {
       if (err.message === "DocumentNotFoundError") {
       return res.status(err404.status).send({ message: "User not found" });
-    } else if (err.name === "ValidationError") {
+    } if (err.name === "ValidationError") {
       return res.status(err400.status).send({ message: "Invalid input data", details: err.message });
     }
     return res.status(err500.status).send({ message: err500.message });
