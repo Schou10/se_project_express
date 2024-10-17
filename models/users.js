@@ -34,11 +34,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "The password field is required."],
     minlength: 8,
+    select: false,
   }
 });
 
 userSchema.statics.findUserByCredentials = (email, password) => {
-  return this.find({email})
+  return this.findOne({email}).select("+password")
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Incorrect password or email'));

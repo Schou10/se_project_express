@@ -55,7 +55,7 @@ const login = (req, res) => {
   const { email, password } = req.body;
   return User.findUserByCredentials(email, password)
   .then((user) => {
-    res.send({
+    res.status(200).send({
       token: jwt.sign({ _id: user._id }, JWT_SECRET,
       { expiresIn: '7d' }),
     });
@@ -63,4 +63,35 @@ const login = (req, res) => {
     .catch(() => res.status(err401.status).send({ message: err401.message }));
 };
 
-module.exports =  { getUsers, createUser, getUser, login };
+const updateUser = (req, res)=>{
+    const { userId } = req.params;
+    const { name, avatar } = req.body;
+    // Validate that the userId is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(err400.status).send({ message: "Invalid user ID" });
+    }
+    // Validate that both name and avatar are provided
+    if (!name || !avatar) {
+      return res.status(err400.status).send({ message: "Both name and avatar fields are required" });
+    }
+    // Find user by ID and update name and avatar
+    return User.findByIdAndUpdate(
+      userId,
+      { name, avatar },  // Only update name and avatar
+      { new: true, runValidators: true }  // Return the updated document, run validators
+    )
+    .orFail()
+    .then((updatedUser) => res.status(200).send(updatedUser))
+    .catch ((err) => {
+      if (err.message === "DocumentNotFoundError") {
+      return res.status(err404.status).send({ message: "User not found" });
+    } else if (err.name === "ValidationError") {
+      return res.status(err400.status).send({ message: "Invalid input data", details: err.message });
+    }
+    return res.status(err500.status).send({ message: err500.message });
+  });
+}
+
+
+
+module.exports =  { getUsers, createUser, getUser, login, updateUser };
