@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const User = require("../models/users");
-const {err400, err404, err500} =require("../utils/errors")
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = require("../utils/config");
+const {err400, err401, err404, err500} =require("../utils/errors");
 
 
 // GET /users returns list of users
@@ -14,10 +17,14 @@ const getUsers = (req, res) =>{
 }
 // POST /users creates a new user
 const createUser = (req, res) => {
-  const {name, avatar} = req.body;
-  User.create({name, avatar})
-    .then((user)=> res.status(201).send(user))
-    .catch((err)=>{
+  const {name, avatar, email, password} = req.body;
+  bcrypt.hash(password, 10)
+  .then((hash) => User.create({name, avatar, email, password: hash}))
+  .then((user)=> res.status(201).send({
+    _id: user._id,
+    email: user.email,
+  }))
+  .catch((err)=>{
       if (err.name === "ValidationError"){
         return res.status(err400.status).send({message: err400.message});
       }
@@ -44,4 +51,16 @@ const getUser = (req, res) => {
   });
 }
 
-module.exports =  { getUsers, createUser, getUser };
+const login = (req, res) => {
+  const { email, password } = req.body;
+  return User.findUserByCredentials(email, password)
+  .then((user) => {
+    res.send({
+      token: jwt.sign({ _id: user._id }, JWT_SECRET,
+      { expiresIn: '7d' }),
+    });
+  })
+    .catch(() => res.status(err401.status).send({ message: err401.message }));
+};
+
+module.exports =  { getUsers, createUser, getUser, login };
