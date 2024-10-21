@@ -12,9 +12,9 @@ router.post("/", auth ,createItem);
 router.delete("/:itemId", auth, deleteItem);
 
 // Route to like a clothing item
-router.put('/:itemId/likes', likeItem);
+router.put('/:itemId/likes', auth, likeItem);
 
 // Route to dislike a clothing item
-router.delete('/:itemId/likes', dislikeItem);
+router.delete('/:itemId/likes', auth, dislikeItem);
 
 module.exports = router;

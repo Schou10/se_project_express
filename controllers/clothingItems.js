@@ -34,7 +34,7 @@ const deleteItem = (req, res) => {
     .orFail()
     .then((item) =>{
       if (item.owner.toString() !== req.user._id){
-        return res.status(err403.status).send(err403.message);
+        return res.status(err403.status).send({message: err403.message});
       }
       return item.remove().then(() => res.status(200).send({ message: 'Item deleted' }))})
     .catch((err)=>{

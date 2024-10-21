@@ -1,20 +1,10 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require("../models/users");
-const JWT_SECRET = require("../utils/config");
-const {err400, err401, err404, err500} =require("../utils/errors");
+const { JWT_SECRET } = require("../utils/config");
+const {err400, err401, err404, err409, err500} =require("../utils/errors");
 
 
-// GET /users returns list of users
-const getUsers = (req, res) =>{
-  User.find({})
-    .then((users)=> res.send(users))
-    .catch((err)=>{
-      console.error(err);
-      return res.status(err500.status).send({message: err500.message});
-    })
-}
 // POST /users creates a new user
 const createUser = (req, res) => {
   const {name, avatar, email, password} = req.body;
@@ -25,34 +15,23 @@ const createUser = (req, res) => {
     email: user.email,
   }))
   .catch((err)=>{
-      if (err.name === "ValidationError"){
-        return res.status(err400.status).send({message: err400.message});
-      }
-      return res.status(err500.status).send({message: err500.message});
-    });
-}
-
-// GET /user/:userId returns one user that matches the id
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(userId)) {
-    return res.status(err400.status).send({ message: "Invalid user ID" });
-  }
-  return User.findById(userId)
-    .orFail()
-    .then((user) => res.status(200).send(user))
-    .catch((err)=>{
-    if (err.name === "DocumentNotFoundError"){
-      return res.status(err404.status).send({message: err404.message});
-    } if (err.name === "CastError"){
+    if(err.code === 11000){
+      return res.status(err409.statua).send({message: err409.message})
+    }
+    if (err.name === "ValidationError"){
       return res.status(err400.status).send({message: err400.message});
     }
     return res.status(err500.status).send({message: err500.message});
   });
 }
 
+
+// Post /signin login
 const login = (req, res) => {
   const { email, password } = req.body;
+  if(!email || !password){
+    return res.status(err400).send({message: err400.message});
+  }
   return User.findUserByCredentials(email, password)
   .then((user) => {
     res.status(200).send({
@@ -60,16 +39,17 @@ const login = (req, res) => {
       { expiresIn: '7d' }),
     });
   })
-    .catch(() => res.status(err401.status).send({ message: err401.message }));
+    .catch((err) => {
+      if (err.message === "Incorrect password or email"){
+        res.status(err401.status).send({ message: err401.message })
+      }
+      res.status(err500.status).send({ message: err500.message })
+    });
 };
-
+// PATCH
 const updateUser = (req, res)=>{
-    const { userId } = req.params;
+    const { userId } = req.user._id;
     const { name, avatar } = req.body;
-    // Validate that the userId is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(err400.status).send({ message: "Invalid user ID" });
-    }
     // Validate that both name and avatar are provided
     if (!name || !avatar) {
       return res.status(err400.status).send({ message: "Both name and avatar fields are required" });
@@ -92,6 +72,21 @@ const updateUser = (req, res)=>{
   });
 }
 
+// GET Current User
+const getCurrentUser = (req, res)=> {
+  const { userId } = req.user._id;
+  if(!userId){
+    return res.status(err404.status).send({message: err404.message })
+  }
+  return User.findOne(userId)
+  .orFail()
+  .then((user)=> res.status(200).send(user))
+  .catch((err)=>{
+    if (err.name === "ValidationError"){
+      return res.status(err400.status).send({message: err400.message});
+    }
+    return res.status(err500.status).send({message: err500.message});
+  });
+}
 
-
-module.exports =  { getUsers, createUser, getUser, login, updateUser };
+module.exports =  {  createUser,  login, updateUser, getCurrentUser };
