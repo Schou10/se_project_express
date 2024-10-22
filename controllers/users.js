@@ -16,7 +16,7 @@ const createUser = (req, res) => {
   }))
   .catch((err)=>{
     if(err.code === 11000){
-      return res.status(err409.statua).send({message: err409.message})
+      return res.status(err409.status).send({message: err409.message})
     }
     if (err.name === "ValidationError"){
       return res.status(err400.status).send({message: err400.message});
@@ -41,14 +41,14 @@ const login = (req, res) => {
   })
     .catch((err) => {
       if (err.message === "Incorrect password or email"){
-        res.status(err401.status).send({ message: err401.message })
+        return res.status(err401.status).send({ message: err401.message })
       }
-      res.status(err500.status).send({ message: err500.message })
+      return res.status(err500.status).send({ message: err500.message })
     });
 };
 // PATCH
 const updateUser = (req, res)=>{
-    const { userId } = req.user._id;
+    const  userId  = req.user._id;
     const { name, avatar } = req.body;
     // Validate that both name and avatar are provided
     if (!name || !avatar) {
@@ -74,11 +74,11 @@ const updateUser = (req, res)=>{
 
 // GET Current User
 const getCurrentUser = (req, res)=> {
-  const { userId } = req.user._id;
+  const  userId  = req.user._id;
   if(!userId){
     return res.status(err404.status).send({message: err404.message })
   }
-  return User.findOne(userId)
+  return User.findById(userId)
   .orFail()
   .then((user)=> res.status(200).send(user))
   .catch((err)=>{
