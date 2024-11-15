@@ -4,5 +4,4 @@ module.exports = {
   err403: {status: 403, message: "You don't have permission to access this resource"},
   err404: { status: 404, message: 'Not Found' },
   err409: {status: 409, message: "Unable to successfully create or update a resource due to a conflict with the current state of the resource"},
-  err500: { status: 500, message: 'Internal Server Error' }
-};
+}

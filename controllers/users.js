@@ -1,12 +1,13 @@
+const {BadRequestError, UnauthorizedError, NotFoundError, ConflictError} = require('../errors/errors')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require("../models/users");
 const { JWT_SECRET } = require("../utils/config");
-const {err400, err401, err404, err409, err500} =require("../utils/errors");
+const {err400, err401, err404, err409} =require("../utils/errors");
 
 
 // POST /users creates a new user
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {name, avatar, email, password} = req.body;
   bcrypt.hash(password, 10)
   .then((hash) => User.create({name, avatar, email, password: hash}))
@@ -16,18 +17,18 @@ const createUser = (req, res) => {
   }))
   .catch((err)=>{
     if(err.code === 11000){
-      return res.status(err409.status).send({message: err409.message})
+      throw new ConflictError(err409.message)
     }
     if (err.name === "ValidationError"){
-      return res.status(err400.status).send({message: err400.message});
+      throw new BadRequestError(err400.message)
     }
-    return res.status(err500.status).send({message: err500.message});
+    next(err)
   });
 }
 
 
 // Post /signin login
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if(!email || !password){
     return res.status(err400).send({message: err400.message});
@@ -48,18 +49,18 @@ const login = (req, res) => {
   })
     .catch((err) => {
       if (err.message === "Incorrect password or email"){
-        return res.status(err401.status).send({ message: err401.message })
+        throw new UnauthorizedError(err401.message);
       }
-      return res.status(err500.status).send({ message: err500.message })
+      next(err)
     });
 };
 // PATCH
-const updateUser = (req, res)=>{
+const updateUser = (req, res, next)=>{
     const  userId  = req.user._id;
     const { name, avatar } = req.body;
     // Validate that both name and avatar are provided
     if (!name || !avatar) {
-      return res.status(err400.status).send({ message: "Both name and avatar fields are required" });
+      throw new BadRequestError("Both name and avatar fields are required");
     }
     // Find user by ID and update name and avatar
     return User.findByIdAndUpdate(
@@ -71,28 +72,28 @@ const updateUser = (req, res)=>{
     .then((updatedUser) => res.status(200).send(updatedUser))
     .catch ((err) => {
       if (err.message === "DocumentNotFoundError") {
-      return res.status(err404.status).send({ message: "User not found" });
+      throw new NotFoundError("User not found");
     } if (err.name === "ValidationError") {
-      return res.status(err400.status).send({ message: "Invalid input data", details: err.message });
+      throw new BadRequestError("Invalid input data");
     }
-    return res.status(err500.status).send({ message: err500.message });
+    next(err)
   });
 }
 
 // GET Current User
-const getCurrentUser = (req, res)=> {
+const getCurrentUser = (req, res, next)=> {
   const  userId  = req.user._id;
   if(!userId){
-    return res.status(err404.status).send({message: err404.message })
+    throw new NotFoundError(err404.message )
   }
   return User.findById(userId)
   .orFail()
   .then((user)=> res.status(200).send(user))
   .catch((err)=>{
     if (err.name === "ValidationError"){
-      return res.status(err400.status).send({message: err400.message});
+      throw new BadRequestError(err400.message);
     }
-    return res.status(err500.status).send({message: err500.message});
+    next(err)
   });
 }
 

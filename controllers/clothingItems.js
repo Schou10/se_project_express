@@ -1,49 +1,52 @@
+const {BadRequestError, ForbiddenError, NotFoundError} = require('../errors/errors')
 const ClothingItem = require("../models/clothingItems");
-const {err400, err403 ,err404, err500 } = require("../utils/errors")
+const {err400, err403 ,err404 } = require("../utils/errors")
 
 
 // GET /items returns all the items
-const getItems = (req, res) =>{
+const getItems = (req, res, next) =>{
   ClothingItem.find({})
     .then((items)=> res.status(200).send(items))
-    .catch(()=> res.status(err500.status).send({message: err500.message}))
+    .catch((err)=> {
+      next(err)
+    })
 }
 
 // POST /items creates a new item
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const {name, weather, imageUrl} =  req.body;
   // Validate incoming data
   if  (!name || !weather || !imageUrl){
-    return res.status(err400.status).send({message: 'All fields are required'});
+    throw new BadRequestError('All fields are required')
   }
   // Creates the item in the database
   return ClothingItem.create({name,weather,imageUrl, owner: req.user._id})
     .then((item)=> res.status(201).send(item))
     .catch((err)=>{
       if (err.name === "ValidationError"){
-        return res.status(err400.status).send({message: err400.message});
+        throw new BadRequestError(err400.message);
       }
-      return res.status(err500.status).send({message: err500.message});
+      next(err)
     });
 }
 
 // DELETE /items/:itemId deletes item with specific id
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   ClothingItem.findById(itemId)
     .orFail()
     .then((item) =>{
       if (item.owner.toString() !== req.user._id){
-        return res.status(err403.status).send({message: err403.message});
+        throw new ForbiddenError(err403.message);
       }
       return item.remove().then(() => res.status(200).send({ message: 'Item deleted' }))})
     .catch((err)=>{
       if (err.name === "DocumentNotFoundError"){
-        return res.status(err404.status).send({message: err404.message});
+        throw new NotFoundError(err404.message);
       } if (err.name === "CastError"){
-        return res.status(err400.status).send({message: err400.message});
+        throw new BadRequestError(err400.message);
       }
-      return res.status(err500.status).send({message: err500.message});
+      next(err)
     })
 }
 
@@ -57,17 +60,17 @@ module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   .then((like)=> res.status(200).send(like))
   .catch((err)=>{
     if (err.name === "DocumentNotFoundError") {
-      res.status(err404.status).send({message: err404.message});
+      throw new NotFoundError(err404.message);
     }
     else if (err.name === 'CastError') {
-      res.status(err400.status).send({message: err400.message});
+      throw new BadRequestError(err400.message)
     }
     else{
-      res.status(err500.status).send({message: err500.message})
+      next(err)
     }
 
   });
-module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
+module.exports.dislikeItem = (req, res, next) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $pull: { likes: req.user._id } }, // remove _id from the array
   { new: true },
@@ -76,12 +79,12 @@ module.exports.dislikeItem = (req, res) => ClothingItem.findByIdAndUpdate(
   .then((dislike)=> res.status(200).send(dislike))
   .catch((err)=> {
     if (err.name === "DocumentNotFoundError") {
-      res.status(err404.status).send({message: err404.message});
+      throw new NotFoundError(err404.message)
     }
     else if (err.name === 'CastError') {
-      res.status(err400.status).send({message: err400.message});
+      throw new BadRequestError(err400.message)
     }
     else{
-    res.status(err500.status).send({message: err500.message})
+      next(err)
     }
   });
