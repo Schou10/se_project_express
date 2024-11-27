@@ -81,10 +81,10 @@ module.exports.dislikeItem = (req, res, next) => ClothingItem.findByIdAndUpdate(
   .then((dislike)=> res.status(200).send(dislike))
   .catch((err)=> {
     if (err.name === "DocumentNotFoundError") {
-      throw new NotFoundError(err404.message)
+      next( new NotFoundError(err404.message));
     }
     else if (err.name === 'CastError') {
-      throw new BadRequestError(err400.message)
+      next( new BadRequestError(err400.message));
     }
     else{
       next(err)
