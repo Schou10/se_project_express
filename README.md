@@ -19,3 +19,7 @@ In this project I utilized eslint to format my code to help me set up the server
 ### Testing
 
 Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+
+- [www.wtwr-sprint.zanity.net](https://www.wtwr-sprint.zanity.net)
+- [wtwr-sprint.zanity.net](https://wtwr-sprint.zanity.net)
+- [api.wtwr-sprint.zanity.net](https://api.wtwr-sprint.zanity.net)

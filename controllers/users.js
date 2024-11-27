@@ -1,6 +1,9 @@
-const {BadRequestError, UnauthorizedError, NotFoundError, ConflictError} = require('../errors/errors')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { BadRequestError } = require('../errors/badrequesterror');
+const { UnauthorizedError } = require('../errors/unauthorizederror');
+const { NotFoundError } = require('../errors/notfounderror');
+const { ConflictError } = require('../errors/conflicterror');
 const User = require("../models/users");
 const { JWT_SECRET } = require("../utils/config");
 const {err400, err401, err404, err409} =require("../utils/errors");
@@ -17,10 +20,10 @@ const createUser = (req, res, next) => {
   }))
   .catch((err)=>{
     if(err.code === 11000){
-      throw new ConflictError(err409.message)
+      next(new ConflictError(err409.message));
     }
     if (err.name === "ValidationError"){
-      throw new BadRequestError(err400.message)
+      next(new BadRequestError(err400.message));
     }
     next(err)
   });
@@ -31,14 +34,14 @@ const createUser = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, password } = req.body;
   if(!email || !password){
-    return res.status(err400).send({message: err400.message});
+    next( new NotFoundError(err400.message))
   }
   return User.findUserByCredentials(email, password)
   .then((user) => {
     const token = jwt.sign({ _id: user._id }, JWT_SECRET,
       { expiresIn: '7d' })
-    res.status(200).send({
-      token: token,
+    res.send({
+      token,
       user: {
         _id: user._id,
         name: user.name,
@@ -49,7 +52,7 @@ const login = (req, res, next) => {
   })
     .catch((err) => {
       if (err.message === "Incorrect password or email"){
-        throw new UnauthorizedError(err401.message);
+       next( new UnauthorizedError(err401.message));
       }
       next(err)
     });
@@ -72,9 +75,9 @@ const updateUser = (req, res, next)=>{
     .then((updatedUser) => res.status(200).send(updatedUser))
     .catch ((err) => {
       if (err.message === "DocumentNotFoundError") {
-      throw new NotFoundError("User not found");
+      next(new NotFoundError("User not found"));
     } if (err.name === "ValidationError") {
-      throw new BadRequestError("Invalid input data");
+      next( new BadRequestError("Invalid input data"));
     }
     next(err)
   });
@@ -91,7 +94,7 @@ const getCurrentUser = (req, res, next)=> {
   .then((user)=> res.status(200).send(user))
   .catch((err)=>{
     if (err.name === "ValidationError"){
-      throw new BadRequestError(err400.message);
+      next(new BadRequestError(err400.message));
     }
     next(err)
   });

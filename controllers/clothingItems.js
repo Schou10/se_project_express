@@ -1,4 +1,6 @@
-const {BadRequestError, ForbiddenError, NotFoundError} = require('../errors/errors')
+const { BadRequestError } = require('../errors/badrequesterror');
+const { ForbiddenError } = require('../errors/forbiddenerror');
+const { NotFoundError }  = require('../errors/notfounderror');
 const ClothingItem = require("../models/clothingItems");
 const {err400, err403 ,err404 } = require("../utils/errors")
 
@@ -6,7 +8,7 @@ const {err400, err403 ,err404 } = require("../utils/errors")
 // GET /items returns all the items
 const getItems = (req, res, next) =>{
   ClothingItem.find({})
-    .then((items)=> res.status(200).send(items))
+    .then((items)=> res.send(items))
     .catch((err)=> {
       next(err)
     })
@@ -51,7 +53,7 @@ const deleteItem = (req, res, next) => {
 }
 
 module.exports =  { getItems, createItem, deleteItem };
-module.exports.likeItem = (req, res) => ClothingItem.findByIdAndUpdate(
+module.exports.likeItem = (req, res, next) => ClothingItem.findByIdAndUpdate(
   req.params.itemId,
   { $addToSet: { likes: req.user._id } }, // add _id to the array if it's not there yet
   { new: true },
